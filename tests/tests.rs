@@ -22,6 +22,13 @@ static SMALLPOP_NO_HEADERS: &'static str =
     include_str!("../examples/data/smallpop-no-headers.csv");
 
 #[test]
+fn fuzz_test_01() {
+    let mut cmd = cmd_for_example("fuzz-test-01");
+    let out = cmd_output_with(&mut cmd, SMALLPOP.as_bytes());
+    assert_eq!(out.stdout().lines().count(), 10);
+}
+
+#[test]
 fn cookbook_read_basic() {
     let mut cmd = cmd_for_example("cookbook-read-basic");
     let out = cmd_output_with(&mut cmd, SMALLPOP.as_bytes());
