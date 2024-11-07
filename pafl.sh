@@ -10,27 +10,34 @@ echo $TARGET
 while test $# -gt 0; do
     case "$1" in
         -staticdump)
-            # set stdin with path_to_csv_file
             cargo +fuzz clean
             # rm -rf ${TARGET}
             
             RUSTFLAGS="-A warnings" \
             MIRIFLAGS="-Zmiri-disable-isolation" \
-            STATIC_DUMP=${TARGET} \
-            PAFL_TARGET_PREFIX=${PREFIX} \
             cargo +fuzz miri run \
-                --example fuzz-test-01 \
+                --example fuzz-test-01 -- "static_dump=${TARGET}" "static_prefix=${PREFIX}" \
             ;;
         -runtimedump)
-            # you need to specify the TRACE_PATH 
-            # set stdin with path_to_csv_file
-            cargo +fuzz clean
-
             RUSTFLAGS="-A warnings" \
             MIRIFLAGS="-Zmiri-disable-isolation" \
-            RUNTIME_DUMP=${TRACE_PATH} \
-                cargo +fuzz miri run \
-                    --example fuzz-test-01 \
+            cargo +fuzz miri run \
+                --example fuzz-test-01 -- "trace=${TRACE_PATH}" \
+            ;;
+        -base)
+            start_time=$(date +%s%N)
+            # MIRIFLAGS=-Zmiri-disable-isolation cargo +fuzz_new miri run --example fuzz-test-01 -- trace=trace.json < /dev/null
+            MIRIFLAGS=-Zmiri-disable-isolation cargo +fuzz_new miri run --example fuzz-test-01 -- trace=trace.json < /tmp/inputs/smallpop.csv
+            end_time=$(date +%s%N)
+            elapsed=$((end_time - start_time))
+            echo "Elapsed time: $((elapsed / 1000000)) ms"
+            ;;
+        -junyi)
+            start_time=$(date +%s%N)
+            MIRIFLAGS=-Zmiri-disable-isolation cargo +fuzz_new4 miri run --example fuzz-test-01 -- trace=trace.json < /tmp/inputs/smallpop.csv
+            end_time=$(date +%s%N)
+            elapsed=$((end_time - start_time))
+            echo "Elapsed time: $((elapsed / 1000000)) ms"
             ;;
         *)
             echo "invalid argument $1"
