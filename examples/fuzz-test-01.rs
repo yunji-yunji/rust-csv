@@ -3,7 +3,7 @@ use std::io::Read;
 use csv_core::{ReadFieldResult, Reader};
 use csv::{ReaderBuilder, WriterBuilder};
 
-fn delimiter() -> Result<(), Box<dyn Error>> {
+fn delimiter(data: &[u8]) -> Result<(), Box<dyn Error>> {
     // let delim = if thread_rng.gen_bool(0.5) { b'|' } else { b',' };
     // let delimiters = [b',', b';', b'\t', b'|', b':'];
     // let delim = if !data.is_empty() { data[0] } else { b',' };
@@ -16,13 +16,13 @@ fn delimiter() -> Result<(), Box<dyn Error>> {
         .flexible(true)
         .trim(csv::Trim::All)
         .comment(Some(b'#'))
-        .from_reader(io::stdin());
+        .from_reader(data);
 
     let mut wtr = WriterBuilder::new()
         .delimiter(b':')
         .from_writer(io::stdout());
 
-    let _ = wtr.write_record(&["field1안", "fiel녕d2", "fi못해eld3"]);
+    // let _ = wtr.write_record(&["field1안", "fiel녕d2", "fi못해eld3"]);
     for result in rdr.records() {
         let record = result?;
         let _ = wtr.write_record(record.iter());
@@ -33,7 +33,7 @@ fn delimiter() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn core_test1(mut data: &[u8]) -> Option<u64> {
+fn _core_test1(mut data: &[u8]) -> Option<u64> {
     let mut rdr = Reader::new();
 
     let mut count = 0;
@@ -79,6 +79,8 @@ fn example() -> Result<(), Box<dyn Error>> {
     // let mut rdr = csv::Reader::from_reader(io::stdin());
     let mut buffer = Vec::new();
     io::stdin().read_to_end(&mut buffer)?;
+    let data: &[u8] = &buffer[..];
+
 /*
     // 1. tutorial-read-basic.rs, tutorial-error-01.rs, ..
     // 2. tutorial-read-headers-02.rs
@@ -112,12 +114,11 @@ fn example() -> Result<(), Box<dyn Error>> {
     println!("{}", count);
  */
     // 6. tutorial-perf-core-01.rs
-    let mut data: &[u8] = &buffer[..];
-    let res2 = core_test1(&mut data);
-    println!("res2 = {:?}", res2);
+    // let res2 = core_test1(&mut data);
+    // println!("res2 = {:?}", res2);
 
     // 7. tutorial-read-delimiter-01.rs
-    let res3 = delimiter();
+    let res3 = delimiter(&data);
     println!("res3 = {:?}", res3);
     Ok(())
 }
